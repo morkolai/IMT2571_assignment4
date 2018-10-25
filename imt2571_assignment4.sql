@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: 25. Okt, 2018 14:51 PM
+-- Generation Time: 25. Okt, 2018 18:08 PM
 -- Tjener-versjon: 10.1.34-MariaDB
 -- PHP Version: 7.2.8
 
@@ -19,7 +19,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `imt2571_assignment4`
+-- Database: `imt20000`
 --
 
 -- --------------------------------------------------------
@@ -81,7 +81,7 @@ CREATE TABLE `event_table` (
   `priceChild` decimal(6,2) NOT NULL,
   `eventCatId` int(10) UNSIGNED NOT NULL,
   `eventOrgId` int(10) UNSIGNED NOT NULL,
-  `evntVenName` varchar(40) COLLATE utf8_danish_ci NOT NULL,
+  `eventVenName` varchar(40) COLLATE utf8_danish_ci NOT NULL,
   `eventBlockNo` int(10) UNSIGNED NOT NULL,
   `eventStreet` varchar(20) COLLATE utf8_danish_ci NOT NULL,
   `eventZipCode` int(9) NOT NULL
@@ -248,7 +248,9 @@ CREATE TABLE `venue` (
 -- Indexes for table `belongsto`
 --
 ALTER TABLE `belongsto`
-  ADD PRIMARY KEY (`belGroupName`,`belPersonName`);
+  ADD PRIMARY KEY (`belGroupName`,`belPersonName`),
+  ADD KEY `belongsto_fk_person` (`belPersonName`),
+  ADD KEY `belongsto_fk_group` (`belGroupName`);
 
 --
 -- Indexes for table `category`
@@ -260,7 +262,8 @@ ALTER TABLE `category`
 -- Indexes for table `city`
 --
 ALTER TABLE `city`
-  ADD PRIMARY KEY (`cityName`,`cityCountyNo`);
+  ADD PRIMARY KEY (`cityName`,`cityCountyNo`),
+  ADD KEY `city_fk` (`cityCountyNo`);
 
 --
 -- Indexes for table `county`
@@ -272,19 +275,26 @@ ALTER TABLE `county`
 -- Indexes for table `event_table`
 --
 ALTER TABLE `event_table`
-  ADD PRIMARY KEY (`eventName`,`eventYear`);
+  ADD PRIMARY KEY (`eventName`,`eventYear`),
+  ADD KEY `event_table_fk_category` (`eventCatId`),
+  ADD KEY `event_table_fk_organizer` (`eventOrgId`),
+  ADD KEY `event_table_fk_venue` (`eventVenName`,`eventBlockNo`,`eventStreet`,`eventZipCode`);
 
 --
 -- Indexes for table `givenby`
 --
 ALTER TABLE `givenby`
-  ADD PRIMARY KEY (`givPerformerName`,`givPerformanceNo`,`givEventName`,`givEventYear`);
+  ADD PRIMARY KEY (`givPerformerName`,`givPerformanceNo`),
+  ADD UNIQUE KEY `givPerformanceNo` (`givPerformanceNo`),
+  ADD KEY `givenby_fk_event` (`givEventName`,`givEventYear`),
+  ADD KEY `givenby_fk_performer` (`givPerformerName`);
 
 --
 -- Indexes for table `group_table`
 --
 ALTER TABLE `group_table`
-  ADD PRIMARY KEY (`groupName`);
+  ADD PRIMARY KEY (`groupName`),
+  ADD KEY `group_table_fk` (`groupName`);
 
 --
 -- Indexes for table `organizer`
@@ -314,37 +324,124 @@ ALTER TABLE `performer`
 -- Indexes for table `person`
 --
 ALTER TABLE `person`
-  ADD PRIMARY KEY (`personName`);
+  ADD PRIMARY KEY (`personName`),
+  ADD KEY `person_fk` (`personName`);
 
 --
 -- Indexes for table `phone`
 --
 ALTER TABLE `phone`
-  ADD PRIMARY KEY (`phoneNo`);
+  ADD PRIMARY KEY (`phoneNo`),
+  ADD KEY `phone_fk` (`phonePartId`);
 
 --
 -- Indexes for table `preference`
 --
 ALTER TABLE `preference`
-  ADD PRIMARY KEY (`prefParticipantId`,`prefPerformerName`,`prefVenueName`,`prefVenueBlockNo`,`prefVenueStreet`,`prefVenueZipCode`);
+  ADD PRIMARY KEY (`prefParticipantId`,`prefPerformerName`,`prefVenueName`,`prefVenueBlockNo`,`prefVenueStreet`,`prefVenueZipCode`),
+  ADD KEY `preference_fk_performer` (`prefPerformerName`),
+  ADD KEY `preference_fk_venue` (`prefVenueName`,`prefVenueBlockNo`,`prefVenueStreet`,`prefVenueZipCode`),
+  ADD KEY `preference_fk_participant` (`prefParticipantId`);
 
 --
 -- Indexes for table `registers`
 --
 ALTER TABLE `registers`
-  ADD PRIMARY KEY (`regParticipantId`,`regEventName`,`regEventYear`);
+  ADD PRIMARY KEY (`regParticipantId`,`regEventName`,`regEventYear`),
+  ADD KEY `registers_fk_event` (`regEventName`,`regEventYear`),
+  ADD KEY `registers_fk_participant` (`regParticipantId`);
 
 --
 -- Indexes for table `schedule_table`
 --
 ALTER TABLE `schedule_table`
-  ADD PRIMARY KEY (`dateOfEvent`,`startTime`,`schEventName`,`schEventYear`);
+  ADD PRIMARY KEY (`dateOfEvent`,`startTime`,`schEventName`,`schEventYear`),
+  ADD KEY `schedule_table_fk` (`schEventName`,`schEventYear`);
 
 --
 -- Indexes for table `venue`
 --
 ALTER TABLE `venue`
-  ADD PRIMARY KEY (`venueName`,`blockNo`,`street`,`zipCode`);
+  ADD PRIMARY KEY (`venueName`,`blockNo`,`street`,`zipCode`),
+  ADD KEY `venue_fk` (`venCityName`,`venCountyNo`);
+
+--
+-- Begrensninger for dumpede tabeller
+--
+
+--
+-- Begrensninger for tabell `belongsto`
+--
+ALTER TABLE `belongsto`
+  ADD CONSTRAINT `belongsto_fk_group` FOREIGN KEY (`belGroupName`) REFERENCES `group_table` (`groupName`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `belongsto_fk_person` FOREIGN KEY (`belPersonName`) REFERENCES `person` (`personName`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Begrensninger for tabell `city`
+--
+ALTER TABLE `city`
+  ADD CONSTRAINT `city_fk` FOREIGN KEY (`cityCountyNo`) REFERENCES `county` (`countyNo`) ON UPDATE CASCADE;
+
+--
+-- Begrensninger for tabell `event_table`
+--
+ALTER TABLE `event_table`
+  ADD CONSTRAINT `event_table_fk_category` FOREIGN KEY (`eventCatId`) REFERENCES `category` (`categoryId`) ON UPDATE CASCADE,
+  ADD CONSTRAINT `event_table_fk_organizer` FOREIGN KEY (`eventOrgId`) REFERENCES `organizer` (`organizerId`) ON UPDATE CASCADE,
+  ADD CONSTRAINT `event_table_fk_venue` FOREIGN KEY (`eventVenName`,`eventBlockNo`,`eventStreet`,`eventZipCode`) REFERENCES `venue` (`venueName`, `blockNo`, `street`, `zipCode`) ON UPDATE CASCADE;
+
+--
+-- Begrensninger for tabell `givenby`
+--
+ALTER TABLE `givenby`
+  ADD CONSTRAINT `givenby_fk_event` FOREIGN KEY (`givEventName`,`givEventYear`) REFERENCES `event_table` (`eventName`, `eventYear`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `givenby_fk_performance` FOREIGN KEY (`givPerformanceNo`) REFERENCES `performance` (`performanceNo`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `givenby_fk_performer` FOREIGN KEY (`givPerformerName`) REFERENCES `performer` (`performerName`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Begrensninger for tabell `group_table`
+--
+ALTER TABLE `group_table`
+  ADD CONSTRAINT `group_table_fk` FOREIGN KEY (`groupName`) REFERENCES `performer` (`performerName`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Begrensninger for tabell `person`
+--
+ALTER TABLE `person`
+  ADD CONSTRAINT `person_fk` FOREIGN KEY (`personName`) REFERENCES `performer` (`performerName`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Begrensninger for tabell `phone`
+--
+ALTER TABLE `phone`
+  ADD CONSTRAINT `phone_fk` FOREIGN KEY (`phonePartId`) REFERENCES `participant` (`participantId`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Begrensninger for tabell `preference`
+--
+ALTER TABLE `preference`
+  ADD CONSTRAINT `preference_fk_participant` FOREIGN KEY (`prefParticipantId`) REFERENCES `participant` (`participantId`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `preference_fk_performer` FOREIGN KEY (`prefPerformerName`) REFERENCES `performer` (`performerName`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `preference_fk_venue` FOREIGN KEY (`prefVenueName`,`prefVenueBlockNo`,`prefVenueStreet`,`prefVenueZipCode`) REFERENCES `venue` (`venueName`, `blockNo`, `street`, `zipCode`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Begrensninger for tabell `registers`
+--
+ALTER TABLE `registers`
+  ADD CONSTRAINT `registers_fk_event` FOREIGN KEY (`regEventName`,`regEventYear`) REFERENCES `event_table` (`eventName`, `eventYear`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `registers_fk_participant` FOREIGN KEY (`regParticipantId`) REFERENCES `participant` (`participantId`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Begrensninger for tabell `schedule_table`
+--
+ALTER TABLE `schedule_table`
+  ADD CONSTRAINT `schedule_table_fk` FOREIGN KEY (`schEventName`,`schEventYear`) REFERENCES `event_table` (`eventName`, `eventYear`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Begrensninger for tabell `venue`
+--
+ALTER TABLE `venue`
+  ADD CONSTRAINT `venue_fk` FOREIGN KEY (`venCityName`,`venCountyNo`) REFERENCES `city` (`cityName`, `cityCountyNo`) ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
