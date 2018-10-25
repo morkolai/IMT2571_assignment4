@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: 25. Okt, 2018 13:50 PM
+-- Generation Time: 25. Okt, 2018 14:51 PM
 -- Tjener-versjon: 10.1.34-MariaDB
 -- PHP Version: 7.2.8
 
@@ -29,8 +29,8 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE `belongsto` (
-  `groupName` varchar(60) COLLATE utf8_danish_ci NOT NULL,
-  `personName` varchar(60) COLLATE utf8_danish_ci NOT NULL,
+  `belGroupName` varchar(60) COLLATE utf8_danish_ci NOT NULL,
+  `belPersonName` varchar(60) COLLATE utf8_danish_ci NOT NULL,
   `dateOfJoining` date NOT NULL,
   `role` varchar(20) COLLATE utf8_danish_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_danish_ci;
@@ -239,6 +239,112 @@ CREATE TABLE `venue` (
   `venCityName` varchar(20) COLLATE utf8_danish_ci NOT NULL,
   `venCountyNo` char(2) COLLATE utf8_danish_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_danish_ci;
+
+--
+-- Indexes for dumped tables
+--
+
+--
+-- Indexes for table `belongsto`
+--
+ALTER TABLE `belongsto`
+  ADD PRIMARY KEY (`belGroupName`,`belPersonName`);
+
+--
+-- Indexes for table `category`
+--
+ALTER TABLE `category`
+  ADD PRIMARY KEY (`categoryId`);
+
+--
+-- Indexes for table `city`
+--
+ALTER TABLE `city`
+  ADD PRIMARY KEY (`cityName`,`cityCountyNo`);
+
+--
+-- Indexes for table `county`
+--
+ALTER TABLE `county`
+  ADD PRIMARY KEY (`countyNo`);
+
+--
+-- Indexes for table `event_table`
+--
+ALTER TABLE `event_table`
+  ADD PRIMARY KEY (`eventName`,`eventYear`);
+
+--
+-- Indexes for table `givenby`
+--
+ALTER TABLE `givenby`
+  ADD PRIMARY KEY (`givPerformerName`,`givPerformanceNo`,`givEventName`,`givEventYear`);
+
+--
+-- Indexes for table `group_table`
+--
+ALTER TABLE `group_table`
+  ADD PRIMARY KEY (`groupName`);
+
+--
+-- Indexes for table `organizer`
+--
+ALTER TABLE `organizer`
+  ADD PRIMARY KEY (`organizerId`);
+
+--
+-- Indexes for table `participant`
+--
+ALTER TABLE `participant`
+  ADD PRIMARY KEY (`participantId`);
+
+--
+-- Indexes for table `performance`
+--
+ALTER TABLE `performance`
+  ADD PRIMARY KEY (`performanceNo`);
+
+--
+-- Indexes for table `performer`
+--
+ALTER TABLE `performer`
+  ADD PRIMARY KEY (`performerName`);
+
+--
+-- Indexes for table `person`
+--
+ALTER TABLE `person`
+  ADD PRIMARY KEY (`personName`);
+
+--
+-- Indexes for table `phone`
+--
+ALTER TABLE `phone`
+  ADD PRIMARY KEY (`phoneNo`);
+
+--
+-- Indexes for table `preference`
+--
+ALTER TABLE `preference`
+  ADD PRIMARY KEY (`prefParticipantId`,`prefPerformerName`,`prefVenueName`,`prefVenueBlockNo`,`prefVenueStreet`,`prefVenueZipCode`);
+
+--
+-- Indexes for table `registers`
+--
+ALTER TABLE `registers`
+  ADD PRIMARY KEY (`regParticipantId`,`regEventName`,`regEventYear`);
+
+--
+-- Indexes for table `schedule_table`
+--
+ALTER TABLE `schedule_table`
+  ADD PRIMARY KEY (`dateOfEvent`,`startTime`,`schEventName`,`schEventYear`);
+
+--
+-- Indexes for table `venue`
+--
+ALTER TABLE `venue`
+  ADD PRIMARY KEY (`venueName`,`blockNo`,`street`,`zipCode`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
